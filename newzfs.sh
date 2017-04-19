@@ -85,7 +85,6 @@ then
         echo ""
 
 
-        echo "Creating boot zpool"
 
         if [ ! -d "/tmp/boot" ]
         then
@@ -94,12 +93,14 @@ then
         
         if [ $i -eq 1 ]
         then
+            echo "Creating boot zpool…"
             zpool create -fm /zboot -o altroot=/tmp/boot boot gpt/boot-$device
         else
+            echo "Attaching to boot zpool…"
             zpool attach boot gpt/boot-$device
         fi
         
-        mkdir /tmp/boot/zboot/boot
+        mkdir /tmp/boot/boot
         echo ""
 
 
@@ -107,7 +108,8 @@ then
         tocrypt="gpt/var-$device gpt/down-$device gpt/root-$device"
         for partition in $tocrypt
         do
-            geli init -b -e AES-XTS -l 256 -K $key_path -s 4096 $partition
+            #geli init -b -e AES-XTS -l 256 -K $key_path -s 4096 $partition
+            geli init -b -e AES-CBC -l 256 -K $key_path -s 4096 $partition
         done
         echo ""
 
@@ -160,8 +162,9 @@ then
     done
 
 
-    echo "Remounting boot zpool…"
+    echo "Exporting boot zpool…"
     zpool export boot
+    echo "Re-importing boot zpool at $constructionsite…"
     zpool import -o altroot=$constructionsite
     echo ""
 
