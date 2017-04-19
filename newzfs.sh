@@ -93,7 +93,7 @@ then
         echo ""
 
         echo "Creating geli containers for all partitions to be crypted."
-        tocrypt="gpt/var-$i gpt/poudriere-$1 gpt/down-$i gpt/root-$i"
+        tocrypt="gpt/var-$i gpt/poudriere-$i gpt/down-$i gpt/root-$i"
         for partition in $tocrypt
         do
             geli init -b -e AES-XTS -l 256 -K $key_path -s 4096 $partition
