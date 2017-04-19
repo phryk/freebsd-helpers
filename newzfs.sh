@@ -127,14 +127,14 @@ then
             echo "Creating var gmirror…"
             gmirror label -v var /dev/gpt/var-$device.eli
             echo "Creating UFS on var gmirror…"
-            newfs -U mirror/var
+            newfs -U /dev/mirror/var
             echo "/dev/mirror/var /var ufs rw 0 2" >> $fstab
             echo ""
 
             echo "Creating down gmirror…"
             gmirror label -v down /dev/gpt/down-$device.eli
             echo "Creating UFS on down gmirror…"
-            newfs -U mirror/down
+            newfs -U /dev/mirror/down
             echo "/dev/mirror/down /media/down ufs rw 0 2" >> $fstab
             echo ""
 
