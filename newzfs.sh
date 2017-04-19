@@ -97,6 +97,7 @@ then
             zpool create -fm /zboot -o altroot=/tmp/boot boot gpt/boot-$device
         else
             zpool attach boot gpt/boot-$device
+        fi
         
         mkdir /tmp/boot/zboot/boot
         echo ""
