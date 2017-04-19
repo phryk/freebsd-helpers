@@ -24,6 +24,11 @@ then
     #echo "# device  mountpoint  fstype  options dump    pass" > $fstab
     echo ""
 
+    echo "Generating secret key."
+    key_path="/tmp/disk.key"
+    dd if=/dev/random of=$key_path bs=4096 count=1
+    echo ""
+
     i=0 # iterated, used to get different labels per device
     for device in $devices
     do
@@ -86,15 +91,16 @@ then
         then
             mkdir /tmp/boot
         fi
-        zpool create -fm /zboot -o altroot=/tmp/boot boot gpt/boot-$device
+        
+        if [ $i -eq 1 ]
+        then
+            zpool create -fm /zboot -o altroot=/tmp/boot boot gpt/boot-$device
+        else
+            zpool attach boot gpt/boot-$device
         
         mkdir /tmp/boot/zboot/boot
         echo ""
 
-        echo "Generating secret key."
-        key_path="/tmp/boot/zboot/boot/disk.key"
-        dd if=/dev/random of=$key_path bs=4096 count=1
-        echo ""
 
         echo "Creating geli containers for all partitions to be crypted."
         tocrypt="gpt/var-$device gpt/down-$device gpt/root-$device"
@@ -111,8 +117,7 @@ then
         done
         echo ""
 
-
-        if [ $i -eq 0 ]
+        if [ $i -eq 1 ]
         then
             echo "Creating root zpool…"
             zpool create -fm / -o altroot=$constructionsite root gpt/root-$device.eli
@@ -134,11 +139,11 @@ then
 
         else
             echo "Attaching to boot zpool…"
-            zpool attacg boot gpt/boot-$device
+            zpool attach boot gpt/boot-$device
             echo ""
 
             echo "Attaching to root zpool…"
-            zpool attach root gpt/root-$device.pool
+            zpool attach root gpt/root-$device.eli
             echo ""
 
             echo "Adding to var gmirror…"
@@ -151,39 +156,41 @@ then
 
         fi
 
-        echo "Remounting boot zpool…"
-        zpool export boot
-        zpool import -o altroot=$constructionsite
-        echo ""
-
-        echo "Mounting var…"
-        mkdir /mnt/var
-        mount mirror/var /mnt/var
-
-        echo "Mounting down…"
-        mkdir -p /mnt/media/down
-        mount mirror/down /mnt/media/down
-
-        echo "Symlinking zfs boot…"
-        ln -s /mnt/zboot/boot /mnt/boot
-
-        zpool import -fo altroot=$constructionsite 
-
-        echo "Disk setup done. Press enter to continue."
-        read x
-        
-        echo "Extracting kernel…"
-        tar -C $constructionsite -xvf kernel.txz
-
-        echo "Extracting base system…"
-        tar -C $constructionsite -xvf base.txz
-
-        echo "Creating fstab…"
-        cat $fstab >> $constructionsite/etc/fstab
-
-        echo "Maybbe it werk now? D:"
-
     done
+
+
+    echo "Remounting boot zpool…"
+    zpool export boot
+    zpool import -o altroot=$constructionsite
+    echo ""
+
+    echo "Mounting var…"
+    mkdir /mnt/var
+    mount mirror/var /mnt/var
+
+    echo "Mounting down…"
+    mkdir -p /mnt/media/down
+    mount mirror/down /mnt/media/down
+
+    echo "Symlinking zfs boot…"
+    ln -s /mnt/zboot/boot /mnt/boot
+
+    zpool import -fo altroot=$constructionsite 
+
+    echo "Disk setup done. Press enter to continue."
+    read x
+    
+    echo "Extracting kernel…"
+    tar -C $constructionsite -xvf kernel.txz
+
+    echo "Extracting base system…"
+    tar -C $constructionsite -xvf base.txz
+
+    echo "Creating fstab…"
+    cat $fstab >> $constructionsite/etc/fstab
+
+    echo "Maybbe it werk now? D:"
+
 else
     echo "That wasn't 'yes': '$optin'"
 fi
