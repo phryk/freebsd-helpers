@@ -70,11 +70,6 @@ then
         echo ""
 
 
-        echo "Adding poudriere partition."
-        gpart add -s 20G -t freebsd-zfs -l poudriere-$device $device
-        echo ""
-
-
         echo "Adding down partition."
         gpart add -s 100G -t freebsd-ufs -l down-$device $device
         echo ""
@@ -102,7 +97,7 @@ then
         echo ""
 
         echo "Creating geli containers for all partitions to be crypted."
-        tocrypt="gpt/var-$device gpt/poudriere-$device gpt/down-$device gpt/root-$device"
+        tocrypt="gpt/var-$device gpt/down-$device gpt/root-$device"
         for partition in $tocrypt
         do
             geli init -b -e AES-XTS -l 256 -K $key_path -s 4096 $partition
@@ -120,7 +115,7 @@ then
         if [ $i -eq 0 ]
         then
             echo "Creating root zpool…"
-            zpool create -fm / -o altroot=$constructionsite root gpt/root-$device.pool
+            zpool create -fm / -o altroot=$constructionsite root gpt/root-$device.eli
             echo ""
 
             echo "Creating var gmirror…"
@@ -156,12 +151,25 @@ then
 
         fi
 
-        echo "Remounting boot zpool"
+        echo "Remounting boot zpool…"
         zpool export boot
-        zpool import -o altroot=$constructionsite/boot
+        zpool import -o altroot=$constructionsite
         echo ""
 
-        echo "Disk setup done. Press enter to continue"
+        echo "Mounting var…"
+        mkdir /mnt/var
+        mount mirror/var /mnt/var
+
+        echo "Mounting down…"
+        mkdir -p /mnt/media/down
+        mount mirror/down /mnt/media/down
+
+        echo "Symlinking zfs boot…"
+        ln -rs /mnt/zboot/boot /mnt/boot
+
+        zpool import -fo altroot=$constructionsite 
+
+        echo "Disk setup done. Press enter to continue."
         read x
         
         echo "Extracting kernel…"
