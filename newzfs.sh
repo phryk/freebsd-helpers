@@ -165,7 +165,7 @@ then
         mount mirror/down /mnt/media/down
 
         echo "Symlinking zfs boot…"
-        ln -rs /mnt/zboot/boot /mnt/boot
+        ln -s /mnt/zboot/boot /mnt/boot
 
         zpool import -fo altroot=$constructionsite 
 
