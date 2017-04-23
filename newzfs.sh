@@ -105,11 +105,12 @@ then
 
 
         echo "Creating geli containers for all partitions to be crypted."
-        tocrypt="gpt/var-$device gpt/down-$device gpt/root-$device"
+        # root using CBC instead of XTS because zfs already does extensive checksum magics
+        geli init -b -e AES-CBC -l 256 -K $key_path -s 4096 gpt/root-$device
+        tocrypt="gpt/var-$device gpt/down-$device"
         for partition in $tocrypt
         do
-            #geli init -b -e AES-XTS -l 256 -K $key_path -s 4096 $partition
-            geli init -b -e AES-CBC -l 256 -K $key_path -s 4096 $partition
+            geli init -b -e AES-XTS -l 256 -K $key_path -s 4096 $partition
         done
         echo ""
 
