@@ -187,7 +187,7 @@ then
     echo "Preparing boot…"
     mkdir /mnt/zboot/boot
     echo "Copying key…"
-    cp $keypath /mnt/zboot/boot/
+    cp $key_path /mnt/zboot/boot/
     echo "Symlinking…"
     ln -s /mnt/zboot/boot /mnt/boot
     echo ""
