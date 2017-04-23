@@ -166,7 +166,7 @@ then
     echo "Exporting boot zpool…"
     zpool export boot
     echo "Re-importing boot zpool at $constructionsite…"
-    zpool import -o altroot=$constructionsite
+    zpool import -o altroot=$constructionsite boot
     echo ""
 
     echo "Mounting var…"
