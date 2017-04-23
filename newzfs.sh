@@ -115,6 +115,8 @@ then
         echo ""
 
         echo "Attaching geli containers."
+
+        geli attach -k $key_path gpt/root-$device
         for partition in $tocrypt
         do
             geli attach -k $key_path $partition
