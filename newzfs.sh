@@ -177,11 +177,11 @@ then
 
     echo "Mounting var…"
     mkdir /mnt/var
-    mount mirror/var /mnt/var
+    mount /dev/mirror/var /mnt/var
 
     echo "Mounting down…"
     mkdir -p /mnt/media/down
-    mount mirror/down /mnt/media/down
+    mount /dev/mirror/down /mnt/media/down
     echo ""
 
     echo "Preparing boot…"
