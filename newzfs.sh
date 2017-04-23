@@ -24,6 +24,10 @@ then
     #echo "# device  mountpoint  fstype  options dump    pass" > $fstab
     echo ""
 
+    echo "Activating gmirror."
+    gmirror load
+    echo ""
+
     echo "Generating secret key."
     key_path="/tmp/disk.key"
     dd if=/dev/random of=$key_path bs=4096 count=1
@@ -178,11 +182,15 @@ then
     echo "Mounting down…"
     mkdir -p /mnt/media/down
     mount mirror/down /mnt/media/down
+    echo ""
 
-    echo "Symlinking zfs boot…"
+    echo "Preparing boot…"
+    mkdir /mnt/zboot/boot
+    echo "Copying key…"
+    cp $keypath /mnt/zboot/boot/
+    echo "Symlinking…"
     ln -s /mnt/zboot/boot /mnt/boot
-
-    zpool import -fo altroot=$constructionsite 
+    echo ""
 
     echo "Disk setup done. Press enter to continue."
     read x
