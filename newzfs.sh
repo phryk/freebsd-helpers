@@ -22,8 +22,8 @@ if [ "$optin" = "yes" ] # yay for sh! miss a few spaces and kill your system, wh
 then
 
     #echo "# device  mountpoint  fstype  options dump    pass" > $fstab
+    echo "tmpfs /tmp tmpfs rw,mode=777 0 20" >> $fstab
 
-    echo "Filling loader.conf…"
     echo 'geom_eli_load="YES"' >> loader.conf
     echo 'aesni_load="YES"' >> loader.conf
     echo 'zfs_load="YES"' >> loader.conf
