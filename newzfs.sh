@@ -220,18 +220,24 @@ then
     echo "Extracting base system…"
     tar -C $constructionsite -xvf base.txz
     
-    echo "Moving/symlinking boot…"
-    mv $constructionsite/boot $constructionsite/zboot/
-    ln -s $constructionsite/zboot/boot $constructionsite/boot
     
     echo "Copying key…"
     cp $key_path $constructionsite/boot/
+    echo ""
     
     echo "Creating loader.conf…"
     cat loader.conf >> $constructionsite/boot/loader.conf
+    echo ""
 
     echo "Creating fstab…"
     cat $fstab >> $constructionsite/etc/fstab
+    echo ""
+
+    echo "Moving/symlinking boot…"
+    mv $constructionsite/boot $constructionsite/zboot/
+
+    cd $constructionsite
+    ln -s boot/boot boot
 
     echo "Maybbe it werk now? D:"
 
