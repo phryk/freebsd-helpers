@@ -237,7 +237,7 @@ then
     mv $constructionsite/boot $constructionsite/zboot/
 
     cd $constructionsite
-    ln -s boot/boot boot
+    ln -s zboot/boot boot
 
     echo "Maybbe it werk now? D:"
 
