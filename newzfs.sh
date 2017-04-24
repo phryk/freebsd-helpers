@@ -25,6 +25,7 @@ then
     echo "tmpfs /tmp tmpfs rw,mode=777 0 20" >> $fstab
 
     echo 'geom_eli_load="YES"' >> loader.conf
+    echo 'geom_mirror_load="YES"' >> loader.conf
     echo 'aesni_load="YES"' >> loader.conf
     echo 'zfs_load="YES"' >> loader.conf
     echo 'tmpfs_load="YES"' >> loader.conf
@@ -150,7 +151,7 @@ then
         then
             echo "Creating root zpool…"
             zpool create -fm / -o altroot=$constructionsite root gpt/root-$device.eli
-            echo 'vfs.root.mountfrom="zfs:root/ROOT/default"' >> loader.conf
+            echo 'vfs.root.mountfrom="zfs:root"' >> loader.conf
             echo ""
 
             echo "Creating var gmirror…"
