@@ -207,9 +207,6 @@ then
     echo "Preparing boot…"
     mkdir $constructionsite/zboot/boot
     
-    echo "Copying key…"
-    cp $key_path $constructionsite/zboot/boot/
-    
     echo "Symlinking…"
     ln -s $constructionsite/zboot/boot $constructionsite/boot
 
@@ -224,6 +221,9 @@ then
 
     echo "Extracting base system…"
     tar -C $constructionsite -xvf base.txz
+    
+    echo "Copying key…"
+    cp $key_path $constructionsite/zboot/boot/
     
     echo "Creating loader.conf…"
     cat loader.conf >> $constructionsite/boot/loader.conf
