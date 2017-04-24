@@ -22,6 +22,17 @@ if [ "$optin" = "yes" ] # yay for sh! miss a few spaces and kill your system, wh
 then
 
     #echo "# device  mountpoint  fstype  options dump    pass" > $fstab
+
+    echo "Filling loader.conf…"
+    echo 'geom_eli_load="YES"' >> loader.conf
+    echo 'aesni_load="YES"' >> loader.conf
+    echo 'zfs_load="YES"' >> loader.conf
+    echo 'tmpfs_load="YES"' >> loader.conf
+    echo 'coretemp_load="YES"' >> loader.conf
+    echo 'beastie_disable="YES"' >> loader.conf
+    echo 'kern.vty="vt"' >> loader.conf
+
+
     echo ""
 
     echo "Activating gmirror."
@@ -70,7 +81,6 @@ then
 
         echo "Adding swap partition."
         gpart add -s 2G -t freebsd-swap -l swap-$device $device
-        echo "/dev/gpt/swap-$device  none    swap    sw  0   0" >> $fstab
         echo ""
 
 
@@ -111,19 +121,28 @@ then
         echo "Creating geli containers for all partitions to be crypted."
         # root using CBC instead of XTS because zfs already does extensive checksum magics
         geli init -b -e AES-CBC -l 256 -K $key_path -s 4096 gpt/root-$device
-        tocrypt="gpt/var-$device gpt/down-$device"
-        for partition in $tocrypt
+        echo "geli_root-$device_keyfile0_load=\"YES\"" >> loader.conf
+        echo "geli_root-$device_keyfile0_type=\"gpt/root-$device:geli_keyfile0\"" >> loader.conf
+        echo "geli_root-$device_keyfile0_name=\"/boot/disk.key\"" >> loader.conf
+        #tocrypt="gpt/var-$device gpt/down-$device gpt/swap-$device"
+        tocrypt="var down swap"
+        for name in $tocrypt
         do
-            geli init -b -e AES-XTS -l 256 -K $key_path -s 4096 $partition
+            geli init -b -e AES-XTS -l 256 -K $key_path -s 4096 gpt/$name-$device
+            echo "geli_$name-$device_keyfile0_load=\"YES\"" >> loader.conf
+            echo "geli_$name-$device_keyfile0_type=\"gpt/$name-$device:geli_keyfile0\"" >> loader.conf
+            echo "geli_$name-$device_keyfile0_name=\"/boot/disk.key\"" >> loader.conf
         done
         echo ""
+
+        echo "/dev/gpt/swap-$device.eli  none    swap    sw  0   0" >> $fstab
 
         echo "Attaching geli containers."
 
         geli attach -k $key_path gpt/root-$device
-        for partition in $tocrypt
+        for name in $tocrypt
         do
-            geli attach -k $key_path $partition
+            geli attach -k $key_path gpt/$name-$device
         done
         echo ""
 
@@ -131,6 +150,7 @@ then
         then
             echo "Creating root zpool…"
             zpool create -fm / -o altroot=$constructionsite root gpt/root-$device.eli
+            echo 'vfs.root.mountfrom="zfs:root/ROOT/default"' >> loader.conf
             echo ""
 
             echo "Creating var gmirror…"
@@ -176,21 +196,25 @@ then
     echo ""
 
     echo "Mounting var…"
-    mkdir /mnt/var
-    mount /dev/mirror/var /mnt/var
+    mkdir $constructionsite/var
+    mount /dev/mirror/var $constructionsite/var
 
     echo "Mounting down…"
-    mkdir -p /mnt/media/down
-    mount /dev/mirror/down /mnt/media/down
+    mkdir -p $constructionsite/media/down
+    mount /dev/mirror/down $constructionsite/media/down
     echo ""
 
     echo "Preparing boot…"
-    mkdir /mnt/zboot/boot
+    mkdir $constructionsite/zboot/boot
+    
     echo "Copying key…"
-    cp $key_path /mnt/zboot/boot/
+    cp $key_path $constructionsite/zboot/boot/
+    
     echo "Symlinking…"
-    ln -s /mnt/zboot/boot /mnt/boot
+    ln -s $constructionsite/zboot/boot $constructionsite/boot
+
     echo ""
+
 
     echo "Disk setup done. Press enter to continue."
     read x
@@ -200,6 +224,9 @@ then
 
     echo "Extracting base system…"
     tar -C $constructionsite -xvf base.txz
+    
+    echo "Creating loader.conf…"
+    cat loader.conf >> $constructionsite/boot/loader.conf
 
     echo "Creating fstab…"
     cat $fstab >> $constructionsite/etc/fstab
