@@ -121,9 +121,9 @@ then
         echo "Creating geli containers for all partitions to be crypted."
         # root using CBC instead of XTS because zfs already does extensive checksum magics
         geli init -b -e AES-CBC -l 256 -K $key_path -s 4096 gpt/root-$device
-        echo "geli_root-{$device}_keyfile0_load=\"YES\"" >> loader.conf
-        echo "geli_root-{$device}_keyfile0_type=\"gpt/root-$device:geli_keyfile0\"" >> loader.conf
-        echo "geli_root-{$device}_keyfile0_name=\"/boot/disk.key\"" >> loader.conf
+        echo "geli_root-${device}_keyfile0_load=\"YES\"" >> loader.conf
+        echo "geli_root-${device}_keyfile0_type=\"gpt/root-$device:geli_keyfile0\"" >> loader.conf
+        echo "geli_root-${device}_keyfile0_name=\"/boot/disk.key\"" >> loader.conf
         #tocrypt="gpt/var-$device gpt/down-$device gpt/swap-$device"
         tocrypt="var down swap"
         for name in $tocrypt
