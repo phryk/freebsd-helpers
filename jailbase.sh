@@ -15,7 +15,9 @@ mkdir /jail/skel/home
 mv /jail/base/etc /jail/skel
 mv /jail/base/usr/local /jail/skel/usr-local
 mv /jail/base/tmp /jail/skel
+chflags noschg /jail/base/var/empty
 mv /jail/base/var /jail/skel
+chflags schg /jail/skel/var/empty
 mv /jail/base/root /jail/skel
 
 #mergemaster -t /jail/skel/var/tmp/temproot -D /jail/skel -i
